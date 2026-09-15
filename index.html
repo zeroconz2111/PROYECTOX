@@ -1,593 +1,1807 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Inventario - Sistema de Gestión</title>
-    <link rel="stylesheet" href="styles.css" />
-    <style>
-      /* Estilos mínimos para que el modal y estados funcionen sin CSS externo */
-      .hidden { display: none; }
-      .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; padding: 20px; z-index: 1000; }
-      .modal.active { display: flex; }
-      .modal-content { background: white; padding: 20px; border-radius: 8px; max-width: 900px; width: 100%; max-height: 90vh; overflow: auto; }
-      .modal-close { cursor: pointer; float: right; font-size: 1.2rem; }
-      .loading { text-align: center; padding: 20px; }
-      .btn-accion, .btn-tarjeta { cursor: pointer; }
-      .stock.bajo { color: #dc2626; }
-      .stock.normal { color: #f59e0b; }
-      .stock.alto { color: #16a34a; }
-      .estado.agotado { color: #ef4444; }
-      .estado.disponible { color: #10b981; }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Inventario | Sistema de Gestión</title>
+
+    <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
-    <!-- Header -->
+
+    <!-- ==================================================
+         ENCABEZADO
+         ================================================== -->
+
     <header class="header">
-        <div class="container">
-            <div class="header-content">
-                <h1>📦 Inventario Disponible</h1>
-                <p>Vista detallada de productos en stock</p>
+        <div class="container header-content">
+
+            <div class="brand">
+                <div class="brand-icon">📦</div>
+
+                <div>
+                    <h1>Inventario</h1>
+                    <p>Sistema de gestión de productos</p>
+                </div>
             </div>
+
+            <div class="api-status">
+                <span class="status-dot"></span>
+                <span>Conectado</span>
+            </div>
+
         </div>
     </header>
 
-    <!-- Main Content -->
-    <main class="container">
-        <!-- Sección de Filtros -->
-        <section class="filters-section">
-            <div class="filters-wrapper">
-                <div class="filter-item">
-                    <label for="searchInput">🔍 Buscar:</label>
-                    <input
-                        type="text"
-                        id="searchInput"
-                        placeholder="Código, nombre o descripción..."
-                        class="input-search"
-                    />
-                </div>
 
-                <div class="filter-item">
-                    <label for="categoryFilter">📂 Categoría:</label>
-                    <select id="categoryFilter" class="input-select">
-                        <option value="">Todas las categorías</option>
-                    </select>
-                </div>
+    <!-- ==================================================
+         CONTENIDO PRINCIPAL
+         ================================================== -->
 
-                <div class="filter-item">
-                    <label for="sortBy">↕️ Ordenar por:</label>
-                    <select id="sortBy" class="input-select">
-                        <option value="nombre">Nombre (A-Z)</option>
-                        <option value="precio-asc">Precio (↓)</option>
-                        <option value="precio-desc">Precio (↑)</option>
-                        <option value="stock-desc">Stock (Mayor)</option>
-                        <option value="stock-asc">Stock (Menor)</option>
-                    </select>
-                </div>
+    <main class="container main-content">
 
-                <div class="filter-item">
-                    <label for="viewType">👁️ Vista:</label>
-                    <select id="viewType" class="input-select">
-                        <option value="tabla">Tabla Detallada</option>
-                        <option value="tarjetas">Tarjetas</option>
-                    </select>
-                </div>
 
-                <button id="resetFilters" class="btn-reset">🔄 Limpiar</button>
+        <!-- ==================================================
+             ESTADÍSTICAS
+             ================================================== -->
+
+        <section class="stats-grid">
+
+            <div class="stat-card">
+                <div class="stat-icon blue">📦</div>
+
+                <div>
+                    <span class="stat-label">
+                        Total de productos
+                    </span>
+
+                    <strong id="totalProductos">
+                        0
+                    </strong>
+                </div>
             </div>
 
-            <!-- Stats -->
-            <div class="stats" style="margin-top:12px; display:flex; gap:18px; flex-wrap:wrap;">
-                <div class="stat-item">
-                    <span class="stat-label">Total Productos</span>
-                    <div><span class="stat-value" id="totalProductos">0</span></div>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">Productos Mostrados</span>
-                    <div><span class="stat-value" id="productosVisibles">0</span></div>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">Valor Total Stock</span>
-                    <div><span class="stat-value" id="valorTotal">$0</span></div>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">Unidades Totales</span>
-                    <div><span class="stat-value" id="unidadesTotales">0</span></div>
+
+            <div class="stat-card">
+                <div class="stat-icon green">👁️</div>
+
+                <div>
+                    <span class="stat-label">
+                        Productos mostrados
+                    </span>
+
+                    <strong id="productosVisibles">
+                        0
+                    </strong>
                 </div>
             </div>
+
+
+            <div class="stat-card">
+                <div class="stat-icon orange">💰</div>
+
+                <div>
+                    <span class="stat-label">
+                        Valor del inventario
+                    </span>
+
+                    <strong id="valorTotal">
+                        $0.00
+                    </strong>
+                </div>
+            </div>
+
+
+            <div class="stat-card">
+                <div class="stat-icon purple">📊</div>
+
+                <div>
+                    <span class="stat-label">
+                        Unidades totales
+                    </span>
+
+                    <strong id="unidadesTotales">
+                        0
+                    </strong>
+                </div>
+            </div>
+
         </section>
 
-        <!-- Estado de Carga -->
-        <div id="loadingState" class="loading" style="display: none;">
+
+        <!-- ==================================================
+             FILTROS
+             ================================================== -->
+
+        <section class="filters-card">
+
+            <div class="section-title">
+                <div>
+                    <h2>Productos</h2>
+                    <p>Consulta y filtra el inventario disponible</p>
+                </div>
+            </div>
+
+
+            <div class="filters-grid">
+
+                <!-- BUSCADOR -->
+
+                <div class="filter-group search-group">
+
+                    <label for="searchInput">
+                        Buscar producto
+                    </label>
+
+                    <div class="search-box">
+
+                        <span class="search-icon">
+                            🔍
+                        </span>
+
+                        <input
+                            type="text"
+                            id="searchInput"
+                            placeholder="Buscar por código, nombre, marca..."
+                            autocomplete="off"
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <!-- CATEGORÍA -->
+
+                <div class="filter-group">
+
+                    <label for="categoryFilter">
+                        Categoría
+                    </label>
+
+                    <select id="categoryFilter">
+
+                        <option value="">
+                            Todas las categorías
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- ORDEN -->
+
+                <div class="filter-group">
+
+                    <label for="sortBy">
+                        Ordenar por
+                    </label>
+
+                    <select id="sortBy">
+
+                        <option value="nombre">
+                            Nombre A-Z
+                        </option>
+
+                        <option value="precio-asc">
+                            Precio menor
+                        </option>
+
+                        <option value="precio-desc">
+                            Precio mayor
+                        </option>
+
+                        <option value="stock-desc">
+                            Mayor stock
+                        </option>
+
+                        <option value="stock-asc">
+                            Menor stock
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- VISTA -->
+
+                <div class="filter-group">
+
+                    <label for="viewType">
+                        Vista
+                    </label>
+
+                    <select id="viewType">
+
+                        <option value="tabla">
+                            Tabla
+                        </option>
+
+                        <option value="tarjetas">
+                            Tarjetas
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- BOTÓN -->
+
+                <div class="filter-group filter-button">
+
+                    <label>
+                        &nbsp;
+                    </label>
+
+                    <button
+                        id="resetFilters"
+                        class="btn-reset"
+                        type="button"
+                    >
+                        ↻ Limpiar filtros
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ==================================================
+             CARGANDO
+             ================================================== -->
+
+        <section
+            id="loadingState"
+            class="loading-state"
+        >
+
             <div class="spinner"></div>
-            <p>Cargando inventario...</p>
-        </div>
 
-        <!-- Tabla Vista Detallada -->
-        <section id="tablaView" class="tabla-container">
-            <div class="tabla-wrapper">
-                <table class="tabla-inventario" id="tablaProductos" style="width:100%; border-collapse:collapse;">
+            <h3>
+                Cargando inventario
+            </h3>
+
+            <p>
+                Estamos obteniendo los productos desde Google Sheets...
+            </p>
+
+        </section>
+
+
+        <!-- ==================================================
+             ERROR
+             ================================================== -->
+
+        <section
+            id="errorState"
+            class="error-state hidden"
+        >
+
+            <div class="error-icon">
+                ⚠️
+            </div>
+
+            <h3>
+                No se pudo cargar el inventario
+            </h3>
+
+            <p id="errorMessage">
+                Ocurrió un error al conectar con la API.
+            </p>
+
+            <button
+                id="retryButton"
+                type="button"
+                class="btn-primary"
+            >
+                🔄 Intentar nuevamente
+            </button>
+
+        </section>
+
+
+        <!-- ==================================================
+             TABLA
+             ================================================== -->
+
+        <section
+            id="tablaView"
+            class="inventory-card hidden"
+        >
+
+            <div class="table-header">
+
+                <div>
+                    <h3>
+                        Inventario disponible
+                    </h3>
+
+                    <p>
+                        Productos activos registrados en el sistema
+                    </p>
+                </div>
+
+                <span
+                    id="tableCount"
+                    class="result-count"
+                >
+                    0 productos
+                </span>
+
+            </div>
+
+
+            <div class="table-scroll">
+
+                <table>
+
                     <thead>
+
                         <tr>
-                            <th>Código</th>
-                            <th>Producto</th>
-                            <th>Descripción</th>
-                            <th>Categoría</th>
-                            <th>Precio Unit.</th>
-                            <th>Stock</th>
-                            <th>Valor Stock</th>
-                            <th>Estado</th>
-                            <th>Acciones</th>
+
+                            <th>
+                                Producto
+                            </th>
+
+                            <th>
+                                Categoría
+                            </th>
+
+                            <th>
+                                Precio
+                            </th>
+
+                            <th>
+                                Stock
+                            </th>
+
+                            <th>
+                                Estado
+                            </th>
+
+                            <th>
+                                Acción
+                            </th>
+
                         </tr>
+
                     </thead>
+
                     <tbody id="tbodyProductos">
-                        <!-- Los productos se cargarán aquí -->
+
                     </tbody>
+
                 </table>
+
             </div>
+
         </section>
 
-        <!-- Vista Tarjetas -->
-        <section id="tarjetasView" class="tarjetas-container" style="display: none;">
-            <div id="tarjetasProductos" class="tarjetas-grid" style="display:grid; grid-template-columns: repeat(auto-fill,minmax(260px,1fr)); gap:12px;">
-                <!-- Las tarjetas se cargarán aquí -->
+
+        <!-- ==================================================
+             TARJETAS
+             ================================================== -->
+
+        <section
+            id="tarjetasView"
+            class="hidden"
+        >
+
+            <div
+                id="tarjetasProductos"
+                class="products-grid"
+            >
+
             </div>
+
         </section>
 
-        <!-- Empty State -->
-        <div id="emptyState" class="empty-state" style="display: none; padding: 20px; text-align:center;">
-            <div class="empty-content">
-                <p class="empty-icon" style="font-size:36px;">📭</p>
-                <p class="empty-text">No se encontraron productos con los filtros seleccionados</p>
+
+        <!-- ==================================================
+             SIN RESULTADOS
+             ================================================== -->
+
+        <section
+            id="emptyState"
+            class="empty-state hidden"
+        >
+
+            <div class="empty-icon">
+                🔎
             </div>
-        </div>
+
+            <h3>
+                No encontramos productos
+            </h3>
+
+            <p>
+                Prueba cambiando los filtros o el término de búsqueda.
+            </p>
+
+        </section>
+
     </main>
 
-    <!-- Modal Detalles Producto -->
-    <div id="modalProducto" class="modal" role="dialog" aria-modal="true" aria-hidden="true">
+
+    <!-- ==================================================
+         MODAL
+         ================================================== -->
+
+    <div
+        id="modalProducto"
+        class="modal"
+        aria-hidden="true"
+    >
+
         <div class="modal-content">
-            <span class="modal-close" title="Cerrar">&times;</span>
-            <div id="modalBody" class="modal-body">
-                <!-- Contenido dinámico -->
+
+            <button
+                class="modal-close"
+                type="button"
+                aria-label="Cerrar"
+            >
+                ×
+            </button>
+
+            <div id="modalBody">
+
             </div>
+
         </div>
+
     </div>
 
+
+    <!-- ==================================================
+         JAVASCRIPT
+         ================================================== -->
+
     <script>
-    // ======= CONFIG =======
-    const API_URL = 'https://script.google.com/macros/s/AKfycbztp9XZKk-UGBi6if6AFDb155_68gJ1QojW0WI4GS6kAO5DTkSoSdBNEB_EOlcbqHRB/exec';
 
-    let productosList = [];
-    let productosFiltrados = [];
+        /* ==================================================
+           CONFIGURACIÓN
+           ================================================== */
 
-    /* ==================================================
-       ELEMENTOS DEL DOM
-       ================================================== */
+        const API_URL =
+            'https://script.google.com/macros/s/AKfycbztp9XZKk-UGBi6if6AFDb155_68gJ1QojW0WI4GS6kAO5DTkSoSdBNEB_EOlcbqHRB/exec';
 
-    const searchInput = document.getElementById('searchInput');
-    const categoryFilter = document.getElementById('categoryFilter');
-    const sortBy = document.getElementById('sortBy');
-    const viewType = document.getElementById('viewType');
-    const resetFilters = document.getElementById('resetFilters');
 
-    const loadingState = document.getElementById('loadingState');
-    const tablaView = document.getElementById('tablaView');
-    const tarjetasView = document.getElementById('tarjetasView');
-    const emptyState = document.getElementById('emptyState');
+        /* ==================================================
+           VARIABLES
+           ================================================== */
 
-    const modal = document.getElementById('modalProducto');
-    const modalClose = document.querySelector('.modal-close');
+        let productosList = [];
 
-    /* ==================================================
-       CARGAR INVENTARIO
-       ================================================== */
+        let productosFiltrados = [];
 
-    async function cargarInventario() {
-        try {
-            loadingState.style.display = 'block';
-            tablaView.style.display = 'none';
-            tarjetasView.style.display = 'none';
-            emptyState.style.display = 'none';
 
-            const response = await fetch(API_URL + '?accion=productos');
+        /* ==================================================
+           ELEMENTOS
+           ================================================== */
 
-            if (!response.ok) {
-                throw new Error('Error HTTP: ' + response.status);
-            }
+        const searchInput =
+            document.getElementById('searchInput');
 
-            const data = await response.json();
+        const categoryFilter =
+            document.getElementById('categoryFilter');
 
-            console.log('Respuesta de la API:', data);
+        const sortBy =
+            document.getElementById('sortBy');
 
-            if (!data.success) {
-                throw new Error(data.error || 'La API devolvió un error');
-            }
+        const viewType =
+            document.getElementById('viewType');
 
-            // La API devuelve "productos"
-            productosList = data.productos || [];
-            productosFiltrados = [...productosList];
+        const resetFilters =
+            document.getElementById('resetFilters');
 
-            if (productosList.length === 0) {
-                loadingState.style.display = 'none';
-                emptyState.style.display = 'block';
+        const retryButton =
+            document.getElementById('retryButton');
+
+        const loadingState =
+            document.getElementById('loadingState');
+
+        const errorState =
+            document.getElementById('errorState');
+
+        const errorMessage =
+            document.getElementById('errorMessage');
+
+        const tablaView =
+            document.getElementById('tablaView');
+
+        const tarjetasView =
+            document.getElementById('tarjetasView');
+
+        const emptyState =
+            document.getElementById('emptyState');
+
+        const modal =
+            document.getElementById('modalProducto');
+
+        const modalBody =
+            document.getElementById('modalBody');
+
+        const modalClose =
+            document.querySelector('.modal-close');
+
+
+        /* ==================================================
+           FORMATO DE PRECIO
+           ================================================== */
+
+        function formatearPrecio(valor) {
+
+            return Number(valor || 0).toLocaleString(
+                'es-MX',
+                {
+                    style: 'currency',
+                    currency: 'MXN'
+                }
+            );
+
+        }
+
+
+        /* ==================================================
+           CARGAR INVENTARIO
+           ================================================== */
+
+        async function cargarInventario() {
+
+            mostrarCarga();
+
+            try {
+
+                const response =
+                    await fetch(
+                        API_URL + '?accion=productos'
+                    );
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        'Error HTTP ' +
+                        response.status
+                    );
+
+                }
+
+
+                const data =
+                    await response.json();
+
+
+                console.log(
+                    'Respuesta de la API:',
+                    data
+                );
+
+
+                if (!data.success) {
+
+                    throw new Error(
+                        data.error ||
+                        'La API devolvió un error'
+                    );
+
+                }
+
+
+                productosList =
+                    Array.isArray(data.productos)
+                        ? data.productos
+                        : [];
+
+
+                productosFiltrados =
+                    [...productosList];
+
+
+                console.log(
+                    'Productos cargados:',
+                    productosList.length
+                );
+
+
+                llenarCategorias();
+
+                ordenar();
+
                 actualizarEstadisticas();
-                return;
+
+
+                if (
+                    productosList.length === 0
+                ) {
+
+                    mostrarSinResultados();
+
+                    return;
+
+                }
+
+
+                renderizar();
+
+                ocultarCarga();
+
+
+            } catch (error) {
+
+                console.error(
+                    'Error al cargar inventario:',
+                    error
+                );
+
+
+                mostrarError(
+                    error.message
+                );
+
             }
 
-            llenarCategorias();
+        }
+
+
+        /* ==================================================
+           ESTADOS DE INTERFAZ
+           ================================================== */
+
+        function mostrarCarga() {
+
+            loadingState.classList.remove(
+                'hidden'
+            );
+
+            errorState.classList.add(
+                'hidden'
+            );
+
+            tablaView.classList.add(
+                'hidden'
+            );
+
+            tarjetasView.classList.add(
+                'hidden'
+            );
+
+            emptyState.classList.add(
+                'hidden'
+            );
+
+        }
+
+
+        function ocultarCarga() {
+
+            loadingState.classList.add(
+                'hidden'
+            );
+
+            errorState.classList.add(
+                'hidden'
+            );
+
+        }
+
+
+        function mostrarError(mensaje) {
+
+            loadingState.classList.add(
+                'hidden'
+            );
+
+            tablaView.classList.add(
+                'hidden'
+            );
+
+            tarjetasView.classList.add(
+                'hidden'
+            );
+
+            emptyState.classList.add(
+                'hidden'
+            );
+
+            errorState.classList.remove(
+                'hidden'
+            );
+
+            errorMessage.textContent =
+                mensaje ||
+                'Error desconocido';
+
+        }
+
+
+        function mostrarSinResultados() {
+
+            loadingState.classList.add(
+                'hidden'
+            );
+
+            errorState.classList.add(
+                'hidden'
+            );
+
+            tablaView.classList.add(
+                'hidden'
+            );
+
+            tarjetasView.classList.add(
+                'hidden'
+            );
+
+            emptyState.classList.remove(
+                'hidden'
+            );
+
+        }
+
+
+        /* ==================================================
+           CATEGORÍAS
+           ================================================== */
+
+        function llenarCategorias() {
+
+            const categorias =
+                [
+                    ...new Set(
+                        productosList
+                            .map(
+                                producto =>
+                                    producto.Categoria
+                            )
+                            .filter(Boolean)
+                    )
+                ]
+                .sort(
+                    (a, b) =>
+                        String(a).localeCompare(
+                            String(b),
+                            'es'
+                        )
+                );
+
+
+            categoryFilter.innerHTML =
+                '<option value="">Todas las categorías</option>';
+
+
+            categorias.forEach(
+                categoria => {
+
+                    const option =
+                        document.createElement(
+                            'option'
+                        );
+
+                    option.value =
+                        categoria;
+
+                    option.textContent =
+                        categoria;
+
+                    categoryFilter.appendChild(
+                        option
+                    );
+
+                }
+            );
+
+        }
+
+
+        /* ==================================================
+           FILTRAR
+           ================================================== */
+
+        function filtrar() {
+
+            const texto =
+                searchInput.value
+                    .trim()
+                    .toLowerCase();
+
+
+            const categoria =
+                categoryFilter.value;
+
+
+            productosFiltrados =
+                productosList.filter(
+                    producto => {
+
+                        const sku =
+                            String(
+                                producto.SKU ||
+                                producto.ID ||
+                                ''
+                            ).toLowerCase();
+
+
+                        const nombre =
+                            String(
+                                producto.Nombre_Producto ||
+                                ''
+                            ).toLowerCase();
+
+
+                        const modelo =
+                            String(
+                                producto.Modelo ||
+                                ''
+                            ).toLowerCase();
+
+
+                        const marca =
+                            String(
+                                producto.Marca ||
+                                ''
+                            ).toLowerCase();
+
+
+                        const descripcion =
+                            String(
+                                producto.Descripcion ||
+                                ''
+                            ).toLowerCase();
+
+
+                        const coincideTexto =
+                            !texto ||
+                            sku.includes(texto) ||
+                            nombre.includes(texto) ||
+                            modelo.includes(texto) ||
+                            marca.includes(texto) ||
+                            descripcion.includes(texto);
+
+
+                        const coincideCategoria =
+                            !categoria ||
+                            producto.Categoria === categoria;
+
+
+                        return (
+                            coincideTexto &&
+                            coincideCategoria
+                        );
+
+                    }
+                );
+
+
             ordenar();
-            renderizar();
+
             actualizarEstadisticas();
-            loadingState.style.display = 'none';
-        } catch (error) {
-            console.error('Error al cargar inventario:', error);
-            loadingState.innerHTML = \`
-                <p>❌ No se pudo cargar el inventario</p>
-                <p style="margin-top:10px;font-size:0.9em;">\${error.message}</p>
-            \`;
+
+            renderizar();
+
         }
-    }
 
-    /* ==================================================
-       LLENAR CATEGORÍAS
-       ================================================== */
 
-    function llenarCategorias() {
-        const categorias = [
-            ...new Set(
-                productosList
-                    .map(producto => producto.Categoria)
-                    .filter(Boolean)
-            )
-        ].sort();
+        /* ==================================================
+           ORDENAR
+           ================================================== */
 
-        categoryFilter.innerHTML = '<option value=\"\">Todas las categorías</option>';
+        function ordenar() {
 
-        categorias.forEach(categoria => {
-            const option = document.createElement('option');
-            option.value = categoria;
-            option.textContent = categoria;
-            categoryFilter.appendChild(option);
-        });
-    }
+            switch (
+                sortBy.value
+            ) {
 
-    /* ==================================================
-       FILTRAR
-       ================================================== */
+                case 'precio-asc':
 
-    function filtrar() {
-        const texto = searchInput.value.trim().toLowerCase();
-        const categoriaSeleccionada = categoryFilter.value;
+                    productosFiltrados.sort(
+                        (a, b) =>
+                            Number(
+                                a.Precio_MXN || 0
+                            ) -
+                            Number(
+                                b.Precio_MXN || 0
+                            )
+                    );
 
-        productosFiltrados = productosList.filter(producto => {
-            const sku = String(producto.SKU || producto.ID || '').toLowerCase();
-            const nombre = String(producto.Nombre_Producto || '').toLowerCase();
-            const modelo = String(producto.Modelo || '').toLowerCase();
-            const marca = String(producto.Marca || '').toLowerCase();
-            const descripcion = String(producto.Descripcion || '').toLowerCase();
+                    break;
 
-            const coincideTexto =
-                !texto ||
-                sku.includes(texto) ||
-                nombre.includes(texto) ||
-                modelo.includes(texto) ||
-                marca.includes(texto) ||
-                descripcion.includes(texto);
 
-            const coincideCategoria = !categoriaSeleccionada || producto.Categoria === categoriaSeleccionada;
+                case 'precio-desc':
 
-            return coincideTexto && coincideCategoria;
-        });
+                    productosFiltrados.sort(
+                        (a, b) =>
+                            Number(
+                                b.Precio_MXN || 0
+                            ) -
+                            Number(
+                                a.Precio_MXN || 0
+                            )
+                    );
 
-        ordenar();
-        renderizar();
-        actualizarEstadisticas();
-    }
+                    break;
 
-    /* ==================================================
-       ORDENAR
-       ================================================== */
 
-    function ordenar() {
-        switch (sortBy.value) {
-            case 'nombre':
-                productosFiltrados.sort((a, b) =>
-                    String(a.Nombre_Producto || '').localeCompare(String(b.Nombre_Producto || ''))
+                case 'stock-desc':
+
+                    productosFiltrados.sort(
+                        (a, b) =>
+                            Number(
+                                b.Stock || 0
+                            ) -
+                            Number(
+                                a.Stock || 0
+                            )
+                    );
+
+                    break;
+
+
+                case 'stock-asc':
+
+                    productosFiltrados.sort(
+                        (a, b) =>
+                            Number(
+                                a.Stock || 0
+                            ) -
+                            Number(
+                                b.Stock || 0
+                            )
+                    );
+
+                    break;
+
+
+                case 'nombre':
+
+                default:
+
+                    productosFiltrados.sort(
+                        (a, b) =>
+                            String(
+                                a.Nombre_Producto || ''
+                            ).localeCompare(
+                                String(
+                                    b.Nombre_Producto || ''
+                                ),
+                                'es'
+                            )
+                    );
+
+                    break;
+
+            }
+
+        }
+
+
+        /* ==================================================
+           RENDERIZAR
+           ================================================== */
+
+        function renderizar() {
+
+            if (
+                productosFiltrados.length === 0
+            ) {
+
+                mostrarSinResultados();
+
+                return;
+
+            }
+
+
+            emptyState.classList.add(
+                'hidden'
+            );
+
+
+            if (
+                viewType.value === 'tabla'
+            ) {
+
+                renderizarTabla();
+
+            } else {
+
+                renderizarTarjetas();
+
+            }
+
+        }
+
+
+        /* ==================================================
+           TABLA
+           ================================================== */
+
+        function renderizarTabla() {
+
+            tablaView.classList.remove(
+                'hidden'
+            );
+
+            tarjetasView.classList.add(
+                'hidden'
+            );
+
+
+            const tbody =
+                document.getElementById(
+                    'tbodyProductos'
                 );
-                break;
 
-            case 'precio-asc':
-                productosFiltrados.sort((a, b) => Number(a.Precio_MXN || 0) - Number(b.Precio_MXN || 0));
-                break;
 
-            case 'precio-desc':
-                productosFiltrados.sort((a, b) => Number(b.Precio_MXN || 0) - Number(a.Precio_MXN || 0));
-                break;
+            tbody.innerHTML = '';
 
-            case 'stock-desc':
-                productosFiltrados.sort((a, b) => Number(b.Stock || 0) - Number(a.Stock || 0));
-                break;
 
-            case 'stock-asc':
-                productosFiltrados.sort((a, b) => Number(a.Stock || 0) - Number(b.Stock || 0));
-                break;
+            productosFiltrados.forEach(
+                producto => {
 
-            default:
-                // fallback: por nombre
-                productosFiltrados.sort((a, b) =>
-                    String(a.Nombre_Producto || '').localeCompare(String(b.Nombre_Producto || ''))
-                );
-                break;
-        }
-    }
+                    const precio =
+                        Number(
+                            producto.Precio_MXN || 0
+                        );
 
-    /* ==================================================
-       FORMATEAR DINERO
-       ================================================== */
 
-    function formatearPrecio(valor) {
-        return Number(valor || 0).toLocaleString('es-MX', {
-            style: 'currency',
-            currency: 'MXN'
-        });
-    }
+                    const stock =
+                        Number(
+                            producto.Stock || 0
+                        );
 
-    /* ==================================================
-       RENDERIZAR
-       ================================================== */
 
-    function renderizar() {
-        if (viewType.value === 'tabla') {
-            renderizarTabla();
-        } else {
-            renderizarTarjetas();
-        }
-    }
+                    const codigo =
+                        producto.SKU ||
+                        producto.ID ||
+                        '-';
 
-    /* ==================================================
-       RENDERIZAR TABLA
-       ================================================== */
 
-    function renderizarTabla() {
-        tablaView.style.display = 'block';
-        tarjetasView.style.display = 'none';
+                    const nombre =
+                        producto.Nombre_Producto ||
+                        'Producto sin nombre';
 
-        if (productosFiltrados.length === 0) {
-            emptyState.style.display = 'block';
-            tablaView.style.display = 'none';
-            return;
-        }
 
-        emptyState.style.display = 'none';
+                    const categoria =
+                        producto.Categoria ||
+                        'Sin categoría';
 
-        const tbody = document.getElementById('tbodyProductos');
-        tbody.innerHTML = '';
 
-        productosFiltrados.forEach(producto => {
-            const precio = Number(producto.Precio_MXN || 0);
-            const stock = Number(producto.Stock || 0);
-            const valorStock = precio * stock;
+                    const marca =
+                        producto.Marca ||
+                        '';
 
-            const stockClass = stock === 0 ? 'bajo' : stock < 10 ? 'bajo' : stock < 50 ? 'normal' : 'alto';
-            const estadoClass = stock === 0 ? 'agotado' : 'disponible';
-            const estadoTexto = stock === 0 ? 'Agotado' : 'Disponible';
 
-            const codigoDisplay = producto.SKU || producto.ID || '-';
+                    const modelo =
+                        producto.Modelo ||
+                        '';
 
-            const tr = document.createElement('tr');
 
-            tr.innerHTML = \`
-                <td><span class="codigo">\${codigoDisplay}</span></td>
-                <td><span class="nombre-producto">\${producto.Nombre_Producto || '-'}</span></td>
-                <td>\${producto.Descripcion || '-'}</td>
-                <td><span class="categoria">\${producto.Categoria || 'Sin categoría'}</span></td>
-                <td><span class="precio">\${formatearPrecio(precio)}</span></td>
-                <td><span class="stock \${stockClass}">\${stock} un.</span></td>
-                <td><strong>\${formatearPrecio(valorStock)}</strong></td>
-                <td><span class="estado \${estadoClass}">\${estadoTexto}</span></td>
-                <td>
-                    <div class="acciones">
-                        <button class="btn-accion" onclick="verDetalles(\${JSON.stringify(codigoDisplay)})">👁️ Ver</button>
-                    </div>
-                </td>
-            \`;
+                    const descripcion =
+                        producto.Descripcion ||
+                        'Sin descripción';
 
-            tbody.appendChild(tr);
-        });
-    }
 
-    /* ==================================================
-       RENDERIZAR TARJETAS
-       ================================================== */
+                    let stockClass =
+                        'stock-high';
 
-    function renderizarTarjetas() {
-        tablaView.style.display = 'none';
-        tarjetasView.style.display = 'block';
 
-        if (productosFiltrados.length === 0) {
-            emptyState.style.display = 'block';
-            tarjetasView.style.display = 'none';
-            return;
-        }
+                    let stockText =
+                        'Disponible';
 
-        emptyState.style.display = 'none';
 
-        const container = document.getElementById('tarjetasProductos');
-        container.innerHTML = '';
+                    if (
+                        stock <= 0
+                    ) {
 
-        productosFiltrados.forEach(producto => {
-            const precio = Number(producto.Precio_MXN || 0);
-            const stock = Number(producto.Stock || 0);
-            const valorStock = precio * stock;
-            const disponible = stock > 0;
-            const codigoDisplay = producto.SKU || producto.ID || '-';
+                        stockClass =
+                            'stock-empty';
 
-            const card = document.createElement('div');
-            card.className = 'tarjeta-producto';
-            card.style = 'border:1px solid #e5e7eb; padding:12px; border-radius:8px; background:white;';
+                        stockText =
+                            'Agotado';
 
-            card.innerHTML = \`
-                <div class="tarjeta-header" style="display:flex; justify-content:space-between; align-items:flex-start;">
-                    <div>
-                        <div class="tarjeta-codigo" style="font-weight:600;">\${codigoDisplay}</div>
-                        <div class="tarjeta-nombre" style="font-size:1.05em;">\${producto.Nombre_Producto || '-'}</div>
-                    </div>
-                    <div class="tarjeta-categoria" style="color:#6b7280;">\${producto.Categoria || 'N/A'}</div>
-                </div>
+                    } else if (
+                        stock < 10
+                    ) {
 
-                <div class="tarjeta-body" style="margin-top:10px;">
-                    <p class="tarjeta-descripcion" style="color:#374151;">\${producto.Descripcion || 'Sin descripción'}</p>
+                        stockClass =
+                            'stock-low';
 
-                    <div class="tarjeta-info" style="display:flex; justify-content:space-between; gap:10px; margin-top:10px;">
-                        <div class="tarjeta-info-item">
-                            <span class="tarjeta-info-label" style="display:block; color:#6b7280;">Precio</span>
-                            <span class="tarjeta-info-valor" style="font-weight:700;">\${formatearPrecio(precio)}</span>
-                        </div>
+                        stockText =
+                            'Stock bajo';
 
-                        <div class="tarjeta-info-item">
-                            <span class="tarjeta-info-label" style="display:block; color:#6b7280;">Stock</span>
-                            <span class="tarjeta-info-valor" style="font-weight:700;">\${stock}</span>
-                        </div>
-                    </div>
+                    } else if (
+                        stock < 50
+                    ) {
 
-                    <div class="tarjeta-info" style="display:flex; justify-content:space-between; gap:10px; margin-top:10px;">
-                        <div class="tarjeta-info-item">
-                            <span class="tarjeta-info-label" style="display:block; color:#6b7280;">Valor Total</span>
-                            <span class="tarjeta-info-valor" style="font-size:1.05em; font-weight:700;">\${formatearPrecio(valorStock)}</span>
-                        </div>
+                        stockClass =
+                            'stock-medium';
 
-                        <div class="tarjeta-info-item">
-                            <span class="tarjeta-info-label" style="display:block; color:#6b7280;">Estado</span>
-                            <span class="tarjeta-info-valor" style="font-weight:700; color:\${disponible ? '#10b981' : '#ef4444'};">
-                                \${disponible ? '✅ Disponible' : '❌ Agotado'}
+                        stockText =
+                            'Disponible';
+
+                    }
+
+
+                    const tr =
+                        document.createElement(
+                            'tr'
+                        );
+
+
+                    tr.innerHTML = `
+
+                        <td>
+
+                            <div class="product-cell">
+
+                                <div class="product-image-small">
+
+                                    ${
+                                        producto.URL_Imagen
+                                            ? `<img
+                                                src="${producto.URL_Imagen}"
+                                                alt="${nombre}"
+                                                loading="lazy"
+                                              >`
+                                            : '📦'
+                                    }
+
+                                </div>
+
+                                <div class="product-info">
+
+                                    <strong>
+                                        ${nombre}
+                                    </strong>
+
+                                    <span>
+                                        ${marca}${modelo ? ' · ' + modelo : ''}
+                                    </span>
+
+                                    <small>
+                                        SKU: ${codigo}
+                                    </small>
+
+                                </div>
+
+                            </div>
+
+                        </td>
+
+
+                        <td>
+
+                            <span class="category-badge">
+                                ${categoria}
                             </span>
+
+                        </td>
+
+
+                        <td>
+
+                            <strong class="price">
+                                ${formatearPrecio(precio)}
+                            </strong>
+
+                        </td>
+
+
+                        <td>
+
+                            <strong>
+                                ${stock}
+                            </strong>
+
+                            <span class="units">
+                                unidades
+                            </span>
+
+                        </td>
+
+
+                        <td>
+
+                            <span class="stock-badge ${stockClass}">
+                                ${stockText}
+                            </span>
+
+                        </td>
+
+
+                        <td>
+
+                            <button
+                                class="btn-view"
+                                type="button"
+                                onclick="verDetalles(${JSON.stringify(codigo)})"
+                            >
+                                Ver detalles
+                            </button>
+
+                        </td>
+
+                    `;
+
+
+                    tbody.appendChild(
+                        tr
+                    );
+
+                }
+            );
+
+
+            document.getElementById(
+                'tableCount'
+            ).textContent =
+                productosFiltrados.length +
+                (
+                    productosFiltrados.length === 1
+                        ? ' producto'
+                        : ' productos'
+                );
+
+        }
+
+
+        /* ==================================================
+           TARJETAS
+           ================================================== */
+
+        function renderizarTarjetas() {
+
+            tablaView.classList.add(
+                'hidden'
+            );
+
+            tarjetasView.classList.remove(
+                'hidden'
+            );
+
+
+            const container =
+                document.getElementById(
+                    'tarjetasProductos'
+                );
+
+
+            container.innerHTML = '';
+
+
+            productosFiltrados.forEach(
+                producto => {
+
+                    const precio =
+                        Number(
+                            producto.Precio_MXN || 0
+                        );
+
+
+                    const stock =
+                        Number(
+                            producto.Stock || 0
+                        );
+
+
+                    const codigo =
+                        producto.SKU ||
+                        producto.ID ||
+                        '-';
+
+
+                    const nombre =
+                        producto.Nombre_Producto ||
+                        'Producto sin nombre';
+
+
+                    const categoria =
+                        producto.Categoria ||
+                        'Sin categoría';
+
+
+                    const disponible =
+                        stock > 0;
+
+
+                    const card =
+                        document.createElement(
+                            'article'
+                        );
+
+
+                    card.className =
+                        'product-card';
+
+
+                    card.innerHTML = `
+
+                        <div class="card-image">
+
+                            ${
+                                producto.URL_Imagen
+                                    ? `<img
+                                        src="${producto.URL_Imagen}"
+                                        alt="${nombre}"
+                                        loading="lazy"
+                                      >`
+                                    : '<span>📦</span>'
+                            }
+
                         </div>
-                    </div>
 
-                    <div class="tarjeta-footer" style="margin-top:12px;">
-                        <button class="btn-tarjeta" onclick="verDetalles(\${JSON.stringify(codigoDisplay)})">Ver Detalles</button>
-                    </div>
-                </div>
-            \`;
 
-            container.appendChild(card);
-        });
-    }
+                        <div class="card-content">
 
-    /* ==================================================
-       VER DETALLES
-       ================================================== */
+                            <div class="card-top">
 
-    function verDetalles(codigo) {
-        const producto = productosList.find(p => String(p.SKU || p.ID) === String(codigo));
-        if (!producto) {
-            return;
+                                <span class="category-badge">
+                                    ${categoria}
+                                </span>
+
+                                <span class="${disponible ? 'dot-available' : 'dot-empty'}"></span>
+
+                            </div>
+
+
+                            <h3>
+                                ${nombre}
+                            </h3>
+
+
+                            <p class="card-code">
+                                SKU: ${codigo}
+                            </p>
+
+
+                            <p class="card-description">
+                                ${producto.Descripcion || 'Sin descripción disponible'}
+                            </p>
+
+
+                            <div class="card-footer">
+
+                                <div>
+
+                                    <span class="card-price">
+                                        ${formatearPrecio(precio)}
+                                    </span>
+
+                                    <span class="card-stock">
+                                        ${stock} unidades
+                                    </span>
+
+                                </div>
+
+
+                                <button
+                                    class="btn-view"
+                                    type="button"
+                                    onclick="verDetalles(${JSON.stringify(codigo)})"
+                                >
+                                    Ver
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    `;
+
+
+                    container.appendChild(
+                        card
+                    );
+
+                }
+            );
+
         }
 
-        const precio = Number(producto.Precio_MXN || 0);
-        const stock = Number(producto.Stock || 0);
-        const valorStock = precio * stock;
 
-        const modalBody = document.getElementById('modalBody');
+        /* ==================================================
+           DETALLES
+           ================================================== */
 
-        modalBody.innerHTML = \`
-            <h2>\${producto.Nombre_Producto || '-'}</h2>
+        function verDetalles(codigo) {
 
-            <div style="background:#f3f4f6;padding:15px;border-radius:10px;margin:15px 0;">
-                <p><strong>SKU:</strong> \${producto.SKU || '-'}</p>
-                <p><strong>Modelo:</strong> \${producto.Modelo || '-'}</p>
-                <p><strong>Marca:</strong> \${producto.Marca || '-'}</p>
-                <p><strong>Categoría:</strong> \${producto.Categoria || 'Sin categoría'}</p>
-            </div>
+            const producto =
+                productosList.find(
+                    producto =>
+                        String(
+                            producto.SKU ||
+                            producto.ID
+                        ) === String(codigo)
+                );
 
-            <h3>Descripción</h3>
-            <p>\${producto.Descripcion || 'Sin descripción disponible'}</p>
 
-            <h3>Información del producto</h3>
+            if (!producto) {
 
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin:15px 0;">
-                <div style="background:#dbeafe;padding:15px;border-radius:10px;">
-                    <p style="color:#0c4a6e;margin:0;">Precio</p>
-                    <p style="font-size:1.5em;font-weight:bold;color:#0369a1;margin:5px 0;">\${formatearPrecio(precio)}</p>
+                return;
+
+            }
+
+
+            const precio =
+                Number(
+                    producto.Precio_MXN || 0
+                );
+
+
+            const stock =
+                Number(
+                    producto.Stock || 0
+                );
+
+
+            const nombre =
+                producto.Nombre_Producto ||
+                'Producto';
+
+
+            modalBody.innerHTML = `
+
+                <div class="modal-product">
+
+                    <div class="modal-product-image">
+
+                        ${
+                            producto.URL_Imagen
+                                ? `<img
+                                    src="${producto.URL_Imagen}"
+                                    alt="${nombre}"
+                                  >`
+                                : '<span>📦</span>'
+                        }
+
+                    </div>
+
+
+                    <div class="modal-product-info">
+
+                        <span class="category-badge">
+                            ${producto.Categoria || 'Sin categoría'}
+                        </span>
+
+
+                        <h2>
+                            ${nombre}
+                        </h2>
+
+
+                        <p class="modal-code">
+                            SKU: ${producto.SKU || '-'}
+                        </p>
+
+
+                        <p class="modal-description">
+                            ${producto.Descripcion || 'Sin descripción disponible'}
+                        </p>
+
+
+                        <div class="detail-grid">
+
+                            <div class="detail-item">
+
+                                <span>
+                                    Marca
+                                </span>
+
+                                <strong>
+                                    ${producto.Marca || '-'}
+                                </strong>
+
+                            </div>
+
+
+                            <div class="detail-item">
+
+                                <span>
+                                    Modelo
+                                </span>
+
+                                <strong>
+                                    ${producto.Modelo || '-'}
+                                </strong>
+
+                            </div>
+
+
+                            <div class="detail-item">
+
+                                <span>
+                                    Precio
+                                </span>
+
+                                <strong class="detail-price">
+                                    ${formatearPrecio(precio)}
+                                </strong>
+
+                            </div>
+
+
+                            <div class="detail-item">
+
+                                <span>
+                                    Stock
+                                </span>
+
+                                <strong>
+                                    ${stock} unidades
+                                </strong>
+
+                            </div>
+
+
+                            <div class="detail-item">
+
+                                <span>
+                                    Garantía
+                                </span>
+
+                                <strong>
+                                    ${producto.Garantia_Meses || 0} meses
+                                </strong>
+
+                            </div>
+
+
+                            <div class="detail-item">
+
+                                <span>
+                                    Calificación
+                                </span>
+
+                                <strong>
+                                    ${producto.Calificacion || 'Sin calificación'}
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
                 </div>
 
-                <div style="background:#dcfce7;padding:15px;border-radius:10px;">
-                    <p style="color:#15803d;margin:0;">Stock</p>
-                    <p style="font-size:1.5em;font-weight:bold;color:#16a34a;margin:5px 0;">\${stock} un.</p>
-                </div>
+            `;
 
-                <div style="background:#fce7f3;padding:15px;border-radius:10px; grid-column:1/-1;">
-                    <p style="color:#831843;margin:0;">Valor Total en Stock</p>
-                    <p style="font-size:1.8em;font-weight:bold;color:#be185d;margin:5px 0;">\${formatearPrecio(valorStock)}</p>
-                </div>
-            </div>
 
-            <p><strong>Garantía:</strong> \${producto.Garantia_Meses || 0} meses</p>
-            <p><strong>Calificación:</strong> \${producto.Calificacion || 'Sin calificación'}</p>
-        \`;
+            modal.classList.add(
+                'active'
+            );
 
-        modal.classList.add('active');
-        modal.setAttribute('aria-hidden', 'false');
-    }
 
-    /* ==================================================
-       ESTADÍSTICAS
-       ================================================== */
+            modal.setAttribute(
+                'aria-hidden',
+                'false'
+            );
 
-    function actualizarEstadisticas() {
-        const total = productosList.length;
-        const visibles = productosFiltrados.length;
-
-        const valorTotal = productosList.reduce((sum, producto) => {
-            const precio = Number(producto.Precio_MXN || 0);
-            const stock = Number(producto.Stock || 0);
-            return sum + precio * stock;
-        }, 0);
-
-        const unidadesTotales = productosList.reduce((sum, producto) => {
-            return sum + Number(producto.Stock || 0);
-        }, 0);
-
-        document.getElementById('totalProductos').textContent = total;
-        document.getElementById('productosVisibles').textContent = visibles;
-        document.getElementById('valorTotal').textContent = formatearPrecio(valorTotal);
-        document.getElementById('unidadesTotales').textContent = unidadesTotales;
-    }
-
-    /* ==================================================
-       EVENTOS
-       ================================================== */
-
-    searchInput.addEventListener('input', filtrar);
-    categoryFilter.addEventListener('change', filtrar);
-    sortBy.addEventListener('change', filtrar);
-    viewType.addEventListener('change', renderizar);
-
-    resetFilters.addEventListener('click', () => {
-        searchInput.value = '';
-        categoryFilter.value = '';
-        sortBy.value = 'nombre';
-        viewType.value = 'tabla';
-        filtrar();
-    });
-
-    modalClose.addEventListener('click', () => {
-        modal.classList.remove('active');
-        modal.setAttribute('aria-hidden', 'true');
-    });
-
-    modal.addEventListener('click', event => {
-        if (event.target === modal) {
-            modal.classList.remove('active');
-            modal.setAttribute('aria-hidden', 'true');
         }
-    });
 
-    /* ==================================================
-       INICIAR
-       ================================================== */
 
-    window.addEventListener('load', cargarInventario);
+        /* ==================================================
+           ESTADÍSTICAS
+           ================================================== */
+
+        function actualizarEstadisticas() {
+
+            const total =
+                productosList.length;
+
+
+            const visibles =
+                productosFiltrados.length;
+
+
+            const valorTotal =
+                productosList.reduce(
+                    (
+                        suma,
+                        producto
+                    ) => {
+
+                        const precio =
+                            Number(
+                                producto.Precio_MXN || 0
+                            );
+
+
+                        const stock =
+                            Number(
+                                producto.Stock || 0
+                            );
+
+
+                        return suma +
+                            (
+                                precio *
+                                stock
+                            );
+
+                    },
+                    0
+                );
+
+
+            const unidadesTotales =
+                productosList.reduce(
+                    (
+                        suma,
+                        producto
+                    ) => {
+
+                        return suma +
+                            Number(
+                                producto.Stock || 0
+                            );
+
+                    },
+                    0
+                );
+
+
+            document.getElementById(
+                'totalProductos'
+            ).textContent =
+                total;
+
+
+            document.getElementById(
+                'productosVisibles'
+            ).textContent =
+                visibles;
+
+
+            document.getElementById(
+                'valorTotal'
+            ).textContent =
+                formatearPrecio(
+                    valorTotal
+                );
+
+
+            document.getElementById(
+                'unidadesTotales'
+            ).textContent =
+                unidadesTotales;
+
+        }
+
+
+        /* ==================================================
+           EVENTOS
+           ================================================== */
+
+        searchInput.addEventListener(
+            'input',
+            filtrar
+        );
+
+
+        categoryFilter.addEventListener(
+            'change',
+            filtrar
+        );
+
+
+        sortBy.addEventListener(
+            'change',
+            filtrar
+        );
+
+
+        viewType.addEventListener(
+            'change',
+            renderizar
+        );
+
+
+        resetFilters.addEventListener(
+            'click',
+            () => {
+
+                searchInput.value =
+                    '';
+
+                categoryFilter.value =
+                    '';
+
+                sortBy.value =
+                    'nombre';
+
+                viewType.value =
+                    'tabla';
+
+                productosFiltrados =
+                    [...productosList];
+
+                ordenar();
+
+                actualizarEstadisticas();
+
+                renderizar();
+
+            }
+        );
+
+
+        retryButton.addEventListener(
+            'click',
+            cargarInventario
+        );
+
+
+        modalClose.addEventListener(
+            'click',
+            cerrarModal
+        );
+
+
+        modal.addEventListener(
+            'click',
+            event => {
+
+                if (
+                    event.target === modal
+                ) {
+
+                    cerrarModal();
+
+                }
+
+            }
+        );
+
+
+        document.addEventListener(
+            'keydown',
+            event => {
+
+                if (
+                    event.key === 'Escape'
+                ) {
+
+                    cerrarModal();
+
+                }
+
+            }
+        );
+
+
+        function cerrarModal() {
+
+            modal.classList.remove(
+                'active'
+            );
+
+            modal.setAttribute(
+                'aria-hidden',
+                'true'
+            );
+
+        }
+
+
+        /* ==================================================
+           INICIAR
+           ================================================== */
+
+        window.addEventListener(
+            'load',
+            cargarInventario
+        );
+
     </script>
+
 </body>
 </html>
