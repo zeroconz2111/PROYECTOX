@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Inventario y Cotizaciones</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <h1>📦 Sistema de Inventario</h1>
+            <p>Consulta productos y genera cotizaciones</p>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="container">
+        <!-- Tabs Navigation -->
+        <nav class="tabs">
+            <button class="tab-btn active" data-tab="inventario">
+                📋 Inventario
+            </button>
+            <button class="tab-btn" data-tab="cotizacion">
+                🧾 Mi Cotización
+            </button>
+        </nav>
+
+        <!-- Tab 1: Inventario -->
+        <section id="inventario" class="tab-content active">
+            <!-- Filters -->
+            <div class="filters">
+                <div class="filter-group">
+                    <label for="searchInput">🔍 Buscar producto:</label>
+                    <input 
+                        type="text" 
+                        id="searchInput" 
+                        placeholder="Nombre, código o descripción..."
+                        class="input-search"
+                    >
+                </div>
+                <div class="filter-group">
+                    <label for="categoryFilter">Categoría:</label>
+                    <select id="categoryFilter" class="input-select">
+                        <option value="">Todas</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="sortBy">Ordenar por:</label>
+                    <select id="sortBy" class="input-select">
+                        <option value="nombre">Nombre (A-Z)</option>
+                        <option value="precio-asc">Precio (Menor a Mayor)</option>
+                        <option value="precio-desc">Precio (Mayor a Menor)</option>
+                        <option value="stock">Stock Disponible</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Loading State -->
+            <div id="loadingState" class="loading">
+                <div class="spinner"></div>
+                <p>Cargando inventario...</p>
+            </div>
+
+            <!-- Products Grid -->
+            <div id="productosContainer" class="productos-grid">
+                <!-- Los productos se cargarán aquí dinámicamente -->
+            </div>
+
+            <!-- Empty State -->
+            <div id="emptyState" class="empty-state" style="display: none;">
+                <p>No se encontraron productos</p>
+            </div>
+        </section>
+
+        <!-- Tab 2: Cotización -->
+        <section id="cotizacion" class="tab-content">
+            <div class="cotizacion-container">
+                <!-- Resumen de Cotización -->
+                <div class="cotizacion-panel">
+                    <h2>📊 Resumen de Cotización</h2>
+                    
+                    <!-- Items en Cotización -->
+                    <div id="cotizacionItems" class="cotizacion-items">
+                        <p class="empty-message">No hay productos en tu cotización</p>
+                    </div>
+
+                    <!-- Totales -->
+                    <div class="cotizacion-totales">
+                        <div class="total-row">
+                            <span>Subtotal:</span>
+                            <span id="subtotal">$0.00</span>
+                        </div>
+                        <div class="total-row">
+                            <label>
+                                <input type="checkbox" id="aplicarIVA">
+                                Aplicar IVA (19%):
+                            </label>
+                            <span id="iva">$0.00</span>
+                        </div>
+                        <div class="total-row total-final">
+                            <span>TOTAL:</span>
+                            <span id="total">$0.00</span>
+                        </div>
+                    </div>
+
+                    <!-- Descuento -->
+                    <div class="descuento-section">
+                        <label for="descuentoPorcentaje">Descuento (%):</label>
+                        <input 
+                            type="number" 
+                            id="descuentoPorcentaje" 
+                            min="0" 
+                            max="100" 
+                            value="0" 
+                            class="input-number"
+                        >
+                        <span id="descuentoMonto">Ahorro: $0.00</span>
+                    </div>
+
+                    <!-- Datos Cliente -->
+                    <div class="cliente-section">
+                        <h3>👤 Información del Cliente</h3>
+                        <input 
+                            type="text" 
+                            id="nombreCliente" 
+                            placeholder="Nombre del cliente" 
+                            class="input-text"
+                        >
+                        <input 
+                            type="email" 
+                            id="emailCliente" 
+                            placeholder="Email" 
+                            class="input-text"
+                        >
+                        <input 
+                            type="tel" 
+                            id="telefonoCliente" 
+                            placeholder="Teléfono" 
+                            class="input-text"
+                        >
+                        <textarea 
+                            id="notasCliente" 
+                            placeholder="Notas adicionales..." 
+                            class="input-textarea"
+                        ></textarea>
+                    </div>
+
+                    <!-- Acciones -->
+                    <div class="acciones">
+                        <button id="vaciarCotizacion" class="btn btn-secondary">
+                            🗑️ Vaciar Cotización
+                        </button>
+                        <button id="exportarPDF" class="btn btn-primary">
+                            📥 Descargar PDF
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal para detalles del producto -->
+    <div id="modalProducto" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div id="modalBody">
+                <!-- Contenido del modal se carga dinámicamente -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="script.js"></script>
+</body>
+</html>
