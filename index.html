@@ -314,10 +314,6 @@
         let productosList = [];
         let productosFiltrados = [];
 
-        /* =========================================================
-           CARGAR INVENTARIO CON JSONP
-           ========================================================= */
-
         function cargarInventario() {
             mostrarCarga();
 
@@ -376,10 +372,6 @@
             }
         }
 
-        /* =========================================================
-           ESTADOS
-           ========================================================= */
-
         function mostrarCarga() {
             document.getElementById('estado').style.display = 'block';
             document.getElementById('estado').innerHTML = '<div class="cargando">Cargando inventario...</div>';
@@ -408,10 +400,6 @@
                 '</div>';
         }
 
-        /* =========================================================
-           CATEGORÍAS
-           ========================================================= */
-
         function llenarCategorias() {
             const select = document.getElementById('categoria');
             const categorias = [...new Set(
@@ -429,10 +417,6 @@
                 select.appendChild(option);
             });
         }
-
-        /* =========================================================
-           FILTRAR
-           ========================================================= */
 
         function filtrar() {
             const texto = document
@@ -480,10 +464,6 @@
             renderizar();
         }
 
-        /* =========================================================
-           ORDENAR
-           ========================================================= */
-
         function ordenar() {
             const orden = document
                 .getElementById('orden')
@@ -523,10 +503,6 @@
             });
         }
 
-        /* =========================================================
-           RENDERIZAR
-           ========================================================= */
-
         function renderizar() {
             const vista = document
                 .getElementById('vista')
@@ -538,10 +514,6 @@
                 renderizarTabla();
             }
         }
-
-        /* =========================================================
-           TABLA
-           ========================================================= */
 
         function renderizarTabla() {
             const contenido = document.getElementById('contenido');
@@ -648,10 +620,6 @@
             contenido.innerHTML = html;
         }
 
-        /* =========================================================
-           TARJETAS
-           ========================================================= */
-
         function renderizarTarjetas() {
             const contenido = document.getElementById('contenido');
 
@@ -710,10 +678,6 @@
             contenido.innerHTML = html;
         }
 
-        /* =========================================================
-           ESTADÍSTICAS
-           ========================================================= */
-
         function actualizarEstadisticas() {
             const totalProductos = productosFiltrados.length;
 
@@ -730,10 +694,6 @@
             document.getElementById('valorInventario').textContent =
                 '$' + valorInventario.toLocaleString('es-MX', { minimumFractionDigits: 2 });
         }
-
-        /* =========================================================
-           DETALLES DEL PRODUCTO
-           ========================================================= */
 
         function verDetalles(identificador) {
             const producto = productosFiltrados.find(p =>
@@ -819,10 +779,6 @@
                 modal.style.display = 'none';
             }
         }
-
-        /* =========================================================
-           EVENT LISTENERS
-           ========================================================= */
 
         document.addEventListener('DOMContentLoaded', function() {
             cargarInventario();
