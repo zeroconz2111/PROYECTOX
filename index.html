@@ -405,85 +405,91 @@ function cargarInventario() {
     const callbackName =
         'inventarioCallback_' + Date.now();
 
-
     window[callbackName] = function(data) {
 
-        try {
+        console.log('Respuesta de la API:', data);
 
-            console.log(
-                'Respuesta de la API:',
-                data
-            );
-
-
-            if (!data || !data.success) {
-
-                throw new Error(
-                    data && data.error
-                        ? data.error
-                        : 'La API devolvió un error'
-                );
-
-            }
-
-
-            productosList =
-                Array.isArray(data.productos)
-                    ? data.productos
-                    : [];
-
-
-            productosFiltrados =
-                [...productosList];
-
-
-            console.log(
-                'Productos cargados:',
-                productosList.length
-            );
-
-
-            llenarCategorias();
-
-            ordenar();
-
-            actualizarEstadisticas();
-
-
-            if (productosList.length === 0) {
-
-                mostrarSinResultados();
-
-                return;
-
-            }
-
-
-            renderizar();
-
-            ocultarCarga();
-
-
-        } catch (error) {
-
-            console.error(
-                'Error al procesar inventario:',
-                error
-            );
+        if (!data || data.success !== true) {
 
             mostrarError(
-                error.message
+                data && data.error
+                    ? data.error
+                    : 'La API devolvió un error'
             );
 
-
-        } finally {
-
             limpiarJSONP();
-
+            return;
         }
 
+        productosList =
+            Array.isArray(data.productos)
+                ? data.productos
+                : [];
+
+        productosFiltrados =
+            [...productosList];
+
+        console.log(
+            'Productos cargados:',
+            productosList.length
+        );
+
+        llenarCategorias();
+
+        ordenar();
+
+        actualizarEstadisticas();
+
+        if (productosList.length === 0) {
+
+            mostrarSinResultados();
+
+            limpiarJSONP();
+            return;
+        }
+
+        renderizar();
+
+        ocultarCarga();
+
+        limpiarJSONP();
     };
 
+
+    const script =
+        document.createElement('script');
+
+    script.src =
+        API_URL +
+        '?accion=productos&callback=' +
+        callbackName;
+
+    script.onerror = function() {
+
+        console.error(
+            'Error cargando JSONP desde Google Apps Script'
+        );
+
+        mostrarError(
+            'No se pudo conectar con la API'
+        );
+
+        limpiarJSONP();
+    };
+
+
+    document.body.appendChild(script);
+
+
+    function limpiarJSONP() {
+
+        if (script.parentNode) {
+            script.parentNode.removeChild(script);
+        }
+
+        delete window[callbackName];
+    }
+}
 
     const script =
         document.createElement('script');
